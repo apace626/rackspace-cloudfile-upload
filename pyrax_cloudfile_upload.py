@@ -7,7 +7,6 @@ pyrax.set_setting("identity_type", "rackspace")
 pyrax.set_credentials("user", "key")
 
 cf = pyrax.cloudfiles
-cont = cf.get_container(containerName)
 
 compressedFileTypes = [".zip", ".gz"]
 
@@ -17,19 +16,18 @@ def main(argv):
 	parser.add_argument('-c', '--container', help='Name of container', required=True)
 	args = parser.parse_args()
 
-	global inputFile
-	global containerName
+	inputFile = args.file
+	containerName = args.container
 	
 	#Verify file type
 	if os.path.isfile(args.file):
 		ext = os.path.splitext(args.file)[-1].lower()
 		if ext in compressedFileTypes:
-			inputFile = args.file
-			containerName = args.container
-			
+			cont = cf.get_container(containerName)				
 			print "Uploading: {0}".format(inputFile)
+			fileName = os.path.basename(inputFile)
 			uploadFile = open(inputFile)
-			obj = cont.store_ibject(inputFile, uploadFile.read())
+			obj = cont.store_object(fileName, uploadFile.read())
 			print "Stored Object Name:", obj.name
 			print "Size:", obj.total_bytes
 			print ""
